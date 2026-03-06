@@ -52,6 +52,26 @@ mvn clean install
 mvn spring-boot:run
 ```
 
+## Test Commands
+
+From `backend/`:
+
+```bash
+mvn clean test
+```
+
+Auth integration tests validate:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+
+## CI
+
+GitHub Actions workflow is configured at `.github/workflows/backend-ci.yml` and runs backend `mvn clean test` on:
+
+- pushes to `main`
+- pull requests targeting `main`
+
 ## GitHub Safety Checklist
 
 - Never commit `.env` or local config overrides.
