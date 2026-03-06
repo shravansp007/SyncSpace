@@ -1,0 +1,57 @@
+﻿<div class="workspace" [class.sidebar-collapsed]="!sidebarOpen()">
+
+  <!-- Mobile overlay -->
+  <div class="overlay" *ngIf="mobileOpen()" (click)="mobileOpen.set(false)"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" [class.mobile-open]="mobileOpen()">
+    <div class="sidebar-top">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <span class="brand-name">SyncSpace</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.route"
+         routerLinkActive="active"
+         class="nav-item"
+         (click)="mobileOpen.set(false)">
+        <span class="nav-icon">{{item.icon}}</span>
+        <span class="nav-label">{{item.label}}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="user-info">
+        <div class="avatar">{{getInitials(user.name)}}</div>
+        <div class="user-text">
+          <span class="user-name">{{user.name}}</span>
+          <span class="user-role">{{user.role || 'Member'}}</span>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">⎋ Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="header">
+      <button class="hamburger" (click)="mobileOpen.set(!mobileOpen())">☰</button>
+      <button class="toggle-btn" (click)="sidebarOpen.set(!sidebarOpen())">◀</button>
+      <div class="search-wrap">
+        <span>🔍</span>
+        <input type="text" placeholder="Search anything..." />
+      </div>
+      <div class="header-right">
+        <button class="icon-btn">🔔</button>
+        <div class="h-avatar">{{getInitials(user.name)}}</div>
+      </div>
+    </header>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

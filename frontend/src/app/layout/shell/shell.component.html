@@ -1,0 +1,99 @@
+﻿<mat-sidenav-container class="app-shell" [class.collapsed]="sidebarCollapsed()">
+  <mat-sidenav mode="side" opened>
+    <div class="nav-wrap elevation-3">
+      <button mat-icon-button class="logo-btn neon-active" aria-label="SyncSpace home">
+        <mat-icon>hub</mat-icon>
+      </button>
+
+      <nav aria-label="Workspace navigation">
+        @for (item of navItems; track item.route) {
+          <a
+            mat-button
+            class="neon-active nav-link"
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            [matTooltip]="sidebarCollapsed() ? item.label : ''"
+            [attr.aria-label]="item.label"
+          >
+            <mat-icon>{{ item.icon }}</mat-icon>
+            @if (!sidebarCollapsed()) {
+              <span>{{ item.label }}</span>
+            }
+          </a>
+        }
+      </nav>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <header class="top-bar glass elevation-2" role="banner">
+      <button mat-icon-button class="neon-active" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+        <mat-icon>{{ sidebarCollapsed() ? 'menu' : 'menu_open' }}</mat-icon>
+      </button>
+
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search conversations, files, members</mat-label>
+        <input matInput [formControl]="searchControl" aria-label="Global search" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <div class="toolbar-actions">
+        <button mat-icon-button class="neon-active" [matMenuTriggerFor]="notificationMenu" [matBadge]="unreadCount()" matBadgeColor="accent" aria-label="Open notifications">
+          <mat-icon>notifications</mat-icon>
+        </button>
+
+        <button mat-icon-button class="neon-active" (click)="toggleTheme()" aria-label="Toggle theme">
+          <mat-icon>{{ mode() === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+        </button>
+
+        <button mat-button [matMenuTriggerFor]="profileMenu" class="profile-btn neon-active" aria-label="Open profile menu">
+          <mat-icon>account_circle</mat-icon>
+          <span>{{ userName() }}</span>
+        </button>
+      </div>
+    </header>
+
+    <mat-menu #notificationMenu="matMenu" class="menu-panel">
+      <section class="menu-header">
+        <div>
+          <h4>Notifications</h4>
+          <small>{{ unreadCount() }} unread</small>
+        </div>
+        <button mat-button (click)="markNotificationsRead()">Mark all read</button>
+      </section>
+
+      @if (notifications().length === 0) {
+        <section class="empty-note">No notifications yet</section>
+      }
+
+      @for (notification of notifications(); track notification.id) {
+        <button mat-menu-item (click)="markNotificationRead(notification.id)">
+          <div [class]="notificationClass(notification)">
+            <mat-icon>{{ notificationIcon(notification.type) }}</mat-icon>
+            <div>
+              <strong>{{ notification.title }}</strong>
+              <small>{{ notification.message }}</small>
+              <small>{{ notification.timestamp | date: 'short' }}</small>
+            </div>
+          </div>
+        </button>
+      }
+    </mat-menu>
+
+    <mat-menu #profileMenu="matMenu">
+      <section class="profile-meta">
+        <strong>{{ userName() }}</strong>
+        <small>{{ userEmail() }}</small>
+      </section>
+      <button mat-menu-item routerLink="/workspace/profile">Profile Settings</button>
+      <button mat-menu-item (click)="logout()" routerLink="/auth/login">Sign Out</button>
+    </mat-menu>
+
+    <main class="content-stage">
+      <div class="route-host" [@routeAnimations]="routeAnimationData(outlet)">
+        <router-outlet #outlet="outlet"></router-outlet>
+      </div>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+

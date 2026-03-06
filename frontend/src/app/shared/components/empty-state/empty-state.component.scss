@@ -1,0 +1,22 @@
+.empty-state {
+  text-align: center;
+  border-radius: 16px;
+  border: 1px dashed var(--border);
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+}
+
+mat-icon {
+  width: 2rem;
+  height: 2rem;
+  font-size: 2rem;
+  color: var(--accent-soft);
+}
+
+h3 {
+  margin: 0.8rem 0 0.4rem;
+}
+
+p {
+  margin: 0;
+}

@@ -1,0 +1,53 @@
+﻿<div class="dashboard page-enter">
+
+  <div class="dash-header">
+    <div>
+      <h1>{{greeting}}, {{user.name}} 👋</h1>
+      <p class="date">{{today}}</p>
+    </div>
+    <div class="quick-actions">
+      <button class="btn-action purple">📹 Start Meeting</button>
+      <button class="btn-action cyan">💬 Open Chat</button>
+      <button class="btn-action ghost">🔗 Invite</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div *ngFor="let s of stats" class="stat-card glass-card">
+      <div *ngIf="s.loading" class="skeleton" style="height:80px;border-radius:12px"></div>
+      <ng-container *ngIf="!s.loading">
+        <div class="stat-icon" [style.background]="s.color + '22'" [style.color]="s.color">
+          {{s.icon}}
+        </div>
+        <div class="stat-body">
+          <span class="stat-val">{{s.label === 'System Status' ? '✅ Healthy' : s.value}}</span>
+          <span class="stat-label">{{s.label}}</span>
+        </div>
+        <span class="trend">{{s.trend}}</span>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="activity-card glass-card">
+      <h3>Recent Activity</h3>
+      <div class="activity-list">
+        <div *ngFor="let a of activities" class="activity-item">
+          <span class="a-icon">{{a.icon}}</span>
+          <span class="a-text">{{a.text}}</span>
+          <span class="a-time">{{a.time}}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-card glass-card">
+      <h3>Quick Actions</h3>
+      <div class="action-list">
+        <button class="action-item">📹 New Meeting</button>
+        <button class="action-item">💬 New Message</button>
+        <button class="action-item">👥 Invite Member</button>
+        <button class="action-item">📁 Share File</button>
+      </div>
+    </div>
+  </div>
+</div>

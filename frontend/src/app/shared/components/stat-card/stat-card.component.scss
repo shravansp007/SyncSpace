@@ -1,0 +1,33 @@
+.stat-card {
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgb(30 41 59 / 0.9), rgb(15 23 42 / 0.86));
+  box-shadow: var(--shadow-soft);
+  padding: 1rem;
+  transition: transform 220ms ease, border-color 220ms ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-soft);
+}
+
+.icon-wrap {
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--accent);
+  background: rgb(0 212 255 / 0.1);
+}
+
+.label {
+  color: var(--text-muted);
+  margin: 0.8rem 0 0.4rem;
+}
+
+h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}

@@ -1,0 +1,106 @@
+﻿<section class="chat-shell">
+  <header class="page-header" [@springIn]>
+    <h1>Realtime Chat</h1>
+    <p>Room-based messaging with persistence, typing state, and live member presence.</p>
+  </header>
+
+  <section class="chat-layout">
+    <aside class="rooms-panel glass elevation-2" [@springIn]>
+      <h3>Rooms</h3>
+      <nav class="room-list" aria-label="Chat rooms">
+        @for (room of rooms(); track room.id) {
+          <button
+            type="button"
+            class="room-item neon-active"
+            [class.active]="activeRoom() === room.id"
+            (click)="selectRoom(room.id)"
+          >
+            <span># {{ room.name }}</span>
+            @if (room.unread > 0) {
+              <span class="pill">{{ room.unread }}</span>
+            }
+          </button>
+        }
+      </nav>
+
+      <mat-divider></mat-divider>
+
+      <h4>Members</h4>
+      @if (vm().membersLoading) {
+        <div class="members-loading">
+          @for (item of [1, 2, 3, 4]; track item) {
+            <app-skeleton-block [height]="38"></app-skeleton-block>
+          }
+        </div>
+      } @else if (vm().members.length === 0) {
+        <app-empty-state title="No members available" description="Member presence appears when users sign in."></app-empty-state>
+      } @else {
+        <mat-list>
+          @for (member of vm().members; track trackMember($index, member)) {
+            <mat-list-item [class.member-active]="member.isActive">
+              <span
+                matListItemIcon
+                class="presence-dot"
+                [class.online]="member.status === 'online'"
+                [class.idle]="member.status === 'idle'"
+                [class.offline]="member.status === 'offline'"
+              ></span>
+              <div matListItemTitle>{{ member.name }}</div>
+              <div matListItemLine>{{ statusLabel(member) }} · {{ member.email }}</div>
+            </mat-list-item>
+          }
+        </mat-list>
+      }
+    </aside>
+
+    <section class="chat-panel glass elevation-2" [@springIn]>
+      <form [formGroup]="roomForm" (ngSubmit)="joinRoom()" class="room-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Current room</mat-label>
+          <input matInput formControlName="roomId" />
+        </mat-form-field>
+        <button mat-flat-button color="primary" class="neon-active" type="submit">Join</button>
+      </form>
+
+      @if (vm().chatState.loading) {
+        <app-skeleton-block [height]="300"></app-skeleton-block>
+      } @else {
+        <div #messageContainer class="messages" [@staggerList]="vm().chatState.messages.length" role="log" aria-live="polite">
+          @if (vm().chatState.error) {
+            <app-empty-state icon="error" title="Unable to load messages" [description]="vm().chatState.error ?? ''"></app-empty-state>
+          }
+
+          @if (vm().chatState.messages.length === 0 && !vm().chatState.error) {
+            <app-empty-state title="Start conversation" description="Send the first message to this room."></app-empty-state>
+          }
+
+          @for (message of vm().chatState.messages; track message.id) {
+            <article
+              class="message"
+              [class.me]="message.senderEmail === vm().senderEmail"
+              [class.unread]="message.senderEmail !== vm().senderEmail"
+              [@springIn]
+            >
+              <span class="author">{{ message.senderEmail }}</span>
+              <p>{{ message.content }}</p>
+              <small>{{ message.createdAt | date: 'MMM d, h:mm a' }}</small>
+            </article>
+          }
+        </div>
+      }
+
+      @if (vm().chatState.typing) {
+        <app-typing-indicator [users]="vm().chatState.typingUsers"></app-typing-indicator>
+      }
+
+      <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="message-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Type a message</mat-label>
+          <input matInput formControlName="message" />
+        </mat-form-field>
+        <button mat-flat-button color="primary" class="neon-active" type="submit">Send</button>
+      </form>
+    </section>
+  </section>
+</section>
+

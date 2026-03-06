@@ -1,0 +1,22 @@
+# Environment and secrets
+.env
+.env.*
+
+# Java/Maven
+**/target/
+*.log
+*.class
+
+# IDE
+.idea/
+.vscode/
+
+# Local app configs
+application-local.properties
+backend/src/main/resources/application-local.properties
+
+# Frontend/node
+**/node_modules/
+frontend/dist/
+frontend/.angular/
+signaling-server/node_modules/

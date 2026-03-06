@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SyncSpace | Login</title>
+</head>
+
+<body>
+
+<h2>SyncSpace Login</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<p onclick="showRegister()">Create account</p>
+
+<div id="reg" style="display:none">
+<input id="name" placeholder="Full name">
+<button onclick="register()">Register</button>
+</div>
+
+<script>
+function showRegister(){
+ document.getElementById("reg").style.display="block";
+}
+
+async function register(){
+
+ const email = email.value;
+ const password = password.value;
+ const name = document.getElementById("name").value;
+
+ const res = await fetch("http://localhost:8080/api/auth/register", {
+  method:"POST",
+  headers:{ "Content-Type":"application/json" },
+  body:JSON.stringify({email,password,name})
+ });
+
+ alert(await res.text());
+}
+
+async function login(){
+
+ const email = document.getElementById("email").value;
+ const password = document.getElementById("password").value;
+
+ const res = await fetch("http://localhost:8080/api/auth/login", {
+  method:"POST",
+  headers:{ "Content-Type":"application/json" },
+  body:JSON.stringify({email,password})
+ });
+
+ const token = await res.text();
+
+ if(token.startsWith("ey")){
+   localStorage.setItem("token",token);
+   alert("Login success");
+   window.location.href="index.html";
+ } else {
+   alert("Invalid credentials");
+ }
+}
+</script>
+
+</body>
+</html>

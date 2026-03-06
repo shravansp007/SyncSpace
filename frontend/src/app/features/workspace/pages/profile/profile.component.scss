@@ -1,0 +1,26 @@
+.profile-shell {
+  display: grid;
+  gap: 16px;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header p {
+  margin: 0.4rem 0 0;
+  color: var(--text-muted);
+}
+
+.glass {
+  max-width: 640px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface-glass);
+  box-shadow: var(--shadow-soft);
+}
+
+.profile-form {
+  display: grid;
+  gap: 12px;
+}

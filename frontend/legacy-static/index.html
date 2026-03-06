@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Welcome 👋</h2>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+const token = localStorage.getItem("token");
+
+if(!token){
+ alert("Please login first");
+ window.location.href="login.html";
+}
+
+function logout(){
+ localStorage.removeItem("token");
+ window.location.href="login.html";
+}
+</script>
+
+</body>
+</html>
+
+
+

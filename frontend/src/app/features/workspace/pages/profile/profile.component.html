@@ -1,0 +1,36 @@
+<section class="profile-shell">
+  <header>
+    <h1>Profile Settings</h1>
+    <p>Manage your workspace identity and presence preferences.</p>
+  </header>
+
+  <mat-card class="glass">
+    <form [formGroup]="form" (ngSubmit)="save()" class="profile-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Display name</mat-label>
+        <input matInput formControlName="displayName" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          <mat-option value="Available">Available</mat-option>
+          <mat-option value="Focused">Focused</mat-option>
+          <mat-option value="Away">Away</mat-option>
+          <mat-option value="Do not disturb">Do not disturb</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Timezone</mat-label>
+        <mat-select formControlName="timezone">
+          <mat-option value="UTC+05:30">UTC+05:30</mat-option>
+          <mat-option value="UTC+00:00">UTC+00:00</mat-option>
+          <mat-option value="UTC-05:00">UTC-05:00</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" type="submit">Save changes</button>
+    </form>
+  </mat-card>
+</section>

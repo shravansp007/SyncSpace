@@ -1,0 +1,59 @@
+﻿<section class="dashboard-shell" [@fadeIn]>
+  <header [@springIn]>
+    <h1>Team Dashboard</h1>
+    <p>Track collaboration health, live presence, and workspace momentum.</p>
+  </header>
+
+  <section class="stats-grid" [@staggerList]="vm().stats.activeUsers + vm().stats.ongoingMeetings + vm().stats.chatMessages">
+    @if (membersLoading()) {
+      @for (item of [1, 2, 3]; track item) {
+        <app-skeleton-block [height]="124"></app-skeleton-block>
+      }
+    } @else {
+      <app-stat-card label="Active Users" [value]="vm().stats.activeUsers.toString()" icon="group"></app-stat-card>
+      <app-stat-card label="Ongoing Meetings" [value]="vm().stats.ongoingMeetings.toString()" icon="groups"></app-stat-card>
+      <app-stat-card label="Chat Messages" [value]="vm().stats.chatMessages.toString()" icon="mark_chat_unread"></app-stat-card>
+    }
+  </section>
+
+  <section class="panel-grid" [@staggerList]="members().length + 1">
+    <mat-card class="panel glass elevation-2" [@springIn]>
+      <h2>Member Presence</h2>
+      @if (membersLoading()) {
+        <div class="members-skeleton">
+          @for (item of [1, 2, 3, 4, 5]; track item) {
+            <app-skeleton-block [height]="38"></app-skeleton-block>
+          }
+        </div>
+      } @else if (members().length === 0) {
+        <app-empty-state title="No members found" description="Presence updates will appear when users connect."></app-empty-state>
+      } @else {
+        <mat-list>
+          @for (member of members(); track member.id) {
+            <mat-list-item [class.member-active]="member.isActive">
+              <span matListItemIcon [class]="statusClass(member.status)"></span>
+              <div matListItemTitle>{{ member.name }}</div>
+              <div matListItemLine>{{ member.status | titlecase }} · {{ member.email }}</div>
+            </mat-list-item>
+          }
+        </mat-list>
+      }
+    </mat-card>
+
+    <mat-card class="panel glass elevation-2" [@springIn]>
+      <h2>Live System Status</h2>
+      <div class="health-row">
+        <span class="chip" [class.good]="vm().health.api === 'healthy'">API: {{ vm().health.api }}</span>
+        <span class="chip" [class.good]="vm().health.websocket === 'connected'">WebSocket: {{ vm().health.websocket }}</span>
+        <span class="chip" [class.good]="vm().health.database === 'connected'">DB: {{ vm().health.database }}</span>
+      </div>
+      <p class="health-meta">
+        Last checked: {{ vm().health.checkedAt | date: 'mediumTime' }}
+        @if (vm().health.latencyMs !== null) {
+          <span> · Latency: {{ vm().health.latencyMs }}ms</span>
+        }
+      </p>
+    </mat-card>
+  </section>
+</section>
+

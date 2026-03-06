@@ -1,0 +1,83 @@
+﻿<section class="call-shell">
+  <div class="ambient-blur"></div>
+
+  <header [@springIn]>
+    <h1>Meetings & Calls</h1>
+    <p>Launch rooms, invite teammates, and collaborate live.</p>
+  </header>
+
+  <section class="meeting-toolbar glass elevation-2" [@springIn]>
+    <form [formGroup]="roomForm" class="actions" (ngSubmit)="createRoom()">
+      <mat-form-field appearance="outline">
+        <mat-label>Create room</mat-label>
+        <input matInput formControlName="roomName" placeholder="Sprint Planning" />
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" class="neon-active">Create</button>
+    </form>
+
+    <form [formGroup]="roomForm" class="actions" (ngSubmit)="joinRoom()">
+      <mat-form-field appearance="outline">
+        <mat-label>Join room ID</mat-label>
+        <input matInput formControlName="roomId" placeholder="room-abc123" />
+      </mat-form-field>
+      <button mat-stroked-button type="submit" class="neon-active">Join</button>
+    </form>
+  </section>
+
+  <section class="room-list" [@staggerList]="rooms().length">
+    @for (room of rooms(); track room.id) {
+      <article class="room-item glass" [@springIn]>
+        <div>
+          <strong>{{ room.name }}</strong>
+          <small>{{ room.id }}</small>
+          <small>{{ room.participants.length }} participants</small>
+        </div>
+        <div class="room-actions">
+          <button mat-button (click)="selectRoom(room.id)">Open</button>
+          <button mat-button (click)="joinRoom(room.id)">Join</button>
+        </div>
+      </article>
+    }
+  </section>
+
+  @if (state$ | async; as state) {
+    @if (!state.connected) {
+      <app-empty-state icon="videocam_off" title="No active meeting" description="Create or join a room to begin a call."></app-empty-state>
+    } @else {
+      <section class="call-header glass elevation-2" [@springIn]>
+        <div>
+          <h2>{{ state.room }}</h2>
+          <p>{{ state.participants.length }} participants connected</p>
+        </div>
+        <button mat-stroked-button (click)="copyInviteLink(state.inviteLink)">
+          <mat-icon>share</mat-icon>
+          Copy Invite Link
+        </button>
+      </section>
+
+      <section class="grid" [@staggerList]="state.participants.length">
+        @for (participant of state.participants; track participant.id) {
+          <article class="tile elevation-2" [class.speaking]="participant.speaking" [@springIn]>
+            <div class="nameplate">
+              <strong>{{ participant.name }}</strong>
+              <div class="media-state">
+                <mat-icon>{{ participant.muted ? 'mic_off' : 'mic' }}</mat-icon>
+                <mat-icon>{{ participant.cameraOn ? 'videocam' : 'videocam_off' }}</mat-icon>
+              </div>
+            </div>
+            <div class="video-placeholder" [class.local]="participant.isLocal">
+              <mat-icon>{{ participant.cameraOn ? 'person' : 'person_off' }}</mat-icon>
+            </div>
+          </article>
+        }
+      </section>
+
+      <footer class="controls glass elevation-3" [@springIn]>
+        <button mat-fab color="primary" class="control-btn neon-active" (click)="toggleMute()" aria-label="Toggle mute"><mat-icon>mic</mat-icon></button>
+        <button mat-fab color="primary" class="control-btn neon-active" (click)="toggleCamera()" aria-label="Toggle camera"><mat-icon>videocam</mat-icon></button>
+        <button mat-fab color="warn" class="control-btn" (click)="leaveCall()" aria-label="Leave call"><mat-icon>call_end</mat-icon></button>
+      </footer>
+    }
+  }
+</section>
+
