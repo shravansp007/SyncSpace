@@ -10,6 +10,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Table(
@@ -32,6 +34,10 @@ public class User {
     @Column(nullable = false, length = 255)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UserRole role = UserRole.MEMBER;
+
     @PrePersist
     @PreUpdate
     void normalize() {
@@ -40,6 +46,9 @@ public class User {
         }
         if (email != null) {
             email = email.trim().toLowerCase();
+        }
+        if (role == null) {
+            role = UserRole.MEMBER;
         }
     }
 
@@ -73,5 +82,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role == null ? UserRole.MEMBER : role;
     }
 }

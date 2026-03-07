@@ -1,4 +1,54 @@
-﻿<div style="padding:32px">
-  <h2 style="color:#F1F5F9;font-size:24px;font-weight:700;margin-bottom:8px">Members</h2>
-  <p style="color:#64748B">Team members list coming soon.</p>
+<div style="padding:32px">
+  <div style="display:flex;align-items:center;justify-content:space-between;max-width:980px;margin-bottom:8px">
+    <h2 style="color:#F1F5F9;font-size:24px;font-weight:700">Members</h2>
+    <button
+      (click)="inviteSelected()"
+      [disabled]="selectedEmails.size === 0 || inviting"
+      style="padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#6C63FF,#8B5CF6);color:#fff;font-weight:600;opacity:1"
+    >
+      {{ inviting ? 'Inviting...' : 'Invite Team Members' }}
+    </button>
+  </div>
+
+  <p *ngIf="loading" style="color:#94A3B8">Loading members...</p>
+
+  <ng-container *ngIf="!loading">
+    <p *ngIf="members.length === 0" style="color:#94A3B8">
+      No members yet. Invite your first team member.
+    </p>
+
+    <div *ngIf="members.length > 0" class="glass-card" style="padding:12px;overflow:auto;max-width:980px">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="text-align:left;color:#94A3B8;border-bottom:1px solid rgba(255,255,255,0.08)">
+            <th style="padding:10px;width:40px"></th>
+            <th style="padding:10px">Name</th>
+            <th style="padding:10px">Email</th>
+            <th style="padding:10px">Role</th>
+            <th style="padding:10px">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let member of members"
+            style="border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer"
+            (click)="openDirectChat(member.email)"
+          >
+            <td style="padding:10px">
+              <input
+                type="checkbox"
+                [checked]="selectedEmails.has(member.email)"
+                (change)="toggleSelection(member.email, $any($event.target).checked)"
+                (click)="$event.stopPropagation()"
+              />
+            </td>
+            <td style="padding:10px;color:#F1F5F9">{{member.name}}</td>
+            <td style="padding:10px;color:#CBD5E1">{{member.email}}</td>
+            <td style="padding:10px;color:#CBD5E1">{{member.role}}</td>
+            <td style="padding:10px;color:#CBD5E1;text-transform:capitalize">{{member.status}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
 </div>

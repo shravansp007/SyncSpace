@@ -49,16 +49,7 @@
         </small>
       </div>
 
-      <div class="field">
-        <label>Role</label>
-        <div class="input-row">
-          <span class="ico">🎯</span>
-          <select formControlName="role">
-            <option value="MEMBER">Member</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-        </div>
-      </div>
+      <p class="role-note">New signups are created as <strong>Member</strong> accounts.</p>
 
       <button type="submit" class="btn-primary" [disabled]="loading">
         <span *ngIf="!loading">Create Account →</span>

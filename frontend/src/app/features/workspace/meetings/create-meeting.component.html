@@ -1,0 +1,38 @@
+<div class="create-meeting">
+  <div class="header">
+    <h2>Create Meeting</h2>
+    <a routerLink="/workspace/meetings">Back to meetings</a>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="glass-card form">
+    <label>
+      Meeting Title
+      <input type="text" formControlName="title" placeholder="Team Sync" />
+    </label>
+
+    <label>
+      Description
+      <textarea rows="3" formControlName="description" placeholder="Agenda for the meeting"></textarea>
+    </label>
+
+    <label>
+      Date & Time
+      <input type="datetime-local" formControlName="startTime" />
+    </label>
+
+    <label>
+      Duration (minutes)
+      <input type="number" formControlName="duration" min="5" />
+    </label>
+
+    <label>
+      Participants (comma separated emails)
+      <input type="text" formControlName="participants" placeholder="a@example.com,b@example.com" />
+    </label>
+
+    <button type="submit" [disabled]="loading">
+      {{ loading ? 'Creating...' : 'Create Meeting' }}
+    </button>
+    <p *ngIf="error" class="error">{{ error }}</p>
+  </form>
+</div>

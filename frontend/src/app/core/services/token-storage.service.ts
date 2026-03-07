@@ -8,12 +8,34 @@ const AUTH_STORAGE_KEY = 'syncspace.auth';
 export class TokenStorageService {
   readSession(): AuthSession | null {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) {
+    if (raw) {
+      try {
+        return JSON.parse(raw) as AuthSession;
+      } catch {
+        return null;
+      }
+    }
+
+    const legacyToken = localStorage.getItem('auth_token');
+    if (!legacyToken) {
+      return null;
+    }
+
+    const legacyUserRaw = localStorage.getItem('auth_user');
+    if (!legacyUserRaw) {
       return null;
     }
 
     try {
-      return JSON.parse(raw) as AuthSession;
+      const legacyUser = JSON.parse(legacyUserRaw) as { id?: number; name?: string; email?: string };
+      return {
+        token: legacyToken,
+        user: {
+          id: legacyUser.id ?? 0,
+          name: legacyUser.name ?? 'User',
+          email: legacyUser.email ?? ''
+        }
+      };
     } catch {
       return null;
     }
@@ -28,6 +50,6 @@ export class TokenStorageService {
   }
 
   readToken(): string | null {
-    return this.readSession()?.token ?? null;
+    return this.readSession()?.token ?? localStorage.getItem('auth_token');
   }
 }

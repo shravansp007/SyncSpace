@@ -1,4 +1,64 @@
-﻿<div style="padding:32px">
+<div style="padding:32px">
   <h2 style="color:#F1F5F9;font-size:24px;font-weight:700;margin-bottom:8px">Chat</h2>
-  <p style="color:#64748B">Real-time messaging coming soon.</p>
+  <div class="glass-card" style="max-width:900px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+    <div>
+      <div style="color:#F1F5F9;font-weight:700">{{ selectedUserName }}</div>
+      <div style="color:#94A3B8;font-size:12px">{{ selectedUserOnline ? 'Online' : 'Offline' }}</div>
+    </div>
+    <button
+      (click)="goToMembers()"
+      style="padding:8px 12px;border-radius:10px;border:none;background:#334155;color:#e2e8f0;font-weight:600"
+    >
+      Open Members
+    </button>
+  </div>
+
+  <p *ngIf="!selectedUserEmail && !loading" style="color:#94A3B8">
+    Select a member from Members page to start a direct conversation.
+  </p>
+
+  <p *ngIf="loading && selectedUserEmail" style="color:#94A3B8">Loading messages...</p>
+
+  <ng-container *ngIf="!loading && selectedUserEmail">
+    <div *ngIf="messages.length === 0" style="color:#94A3B8">
+      No messages yet. Start a conversation.
+    </div>
+
+    <div
+      *ngIf="messages.length > 0"
+      style="display:flex;flex-direction:column;gap:10px;max-width:900px;max-height:430px;overflow:auto;padding-right:6px"
+    >
+      <div
+        *ngFor="let message of messages"
+        class="glass-card"
+        style="padding:12px 14px"
+        [style.marginLeft]="isMine(message) ? '80px' : '0'"
+        [style.marginRight]="isMine(message) ? '0' : '80px'"
+      >
+        <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:4px">
+          <strong style="color:#CBD5E1">{{message.senderEmail}}</strong>
+          <span style="color:#64748B;font-size:12px">{{message.createdAt | date:'short'}}</span>
+        </div>
+        <p style="color:#F1F5F9">{{message.content}}</p>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;max-width:900px;margin-top:16px">
+      <input
+        [(ngModel)]="draftMessage"
+        (keyup.enter)="sendMessage()"
+        placeholder="Type a message"
+        [disabled]="!selectedUserEmail"
+        style="flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:#0f172a;color:#f8fafc"
+      />
+      <button
+        (click)="sendMessage()"
+        [disabled]="!selectedUserEmail"
+        style="padding:10px 16px;border-radius:10px;border:none;background:linear-gradient(135deg,#6C63FF,#8B5CF6);color:#fff;font-weight:600"
+      >
+        Send
+      </button>
+    </div>
+    <p *ngIf="sendError" style="color:#fca5a5;max-width:900px;margin-top:10px">{{ sendError }}</p>
+  </ng-container>
 </div>

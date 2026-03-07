@@ -23,11 +23,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final RateLimitFilter rateLimitFilter;
+    private final RequestLoggingFilter requestLoggingFilter;
     private final UserRepository userRepository;
 
     @Autowired
-    public SecurityConfig(JwtFilter jwtFilter, UserRepository userRepository) {
+    public SecurityConfig(
+            JwtFilter jwtFilter,
+            RateLimitFilter rateLimitFilter,
+            RequestLoggingFilter requestLoggingFilter,
+            UserRepository userRepository
+    ) {
         this.jwtFilter = jwtFilter;
+        this.rateLimitFilter = rateLimitFilter;
+        this.requestLoggingFilter = requestLoggingFilter;
         this.userRepository = userRepository;
     }
 
@@ -42,6 +51,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/api/auth/**", "/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(requestLoggingFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -58,7 +69,7 @@ public class SecurityConfig {
                 .map(user -> org.springframework.security.core.userdetails.User
                         .withUsername(user.getEmail())
                         .password(user.getPassword())
-                        .authorities("ROLE_USER")
+                        .authorities("ROLE_" + user.getRole().name())
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }

@@ -1,7 +1,22 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { catchError, forkJoin, map, of, Subject, takeUntil } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+import { WebsocketService } from '../../../core/services/websocket.service';
 
-interface StatCard { icon: string; label: string; value: number; trend: string; color: string; loading: boolean; }
+interface ActivityItem {
+  message: string;
+  createdAt?: string;
+}
+
+interface StatCard {
+  icon: string;
+  label: string;
+  value: number;
+  color: string;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -10,40 +25,131 @@ interface StatCard { icon: string; label: string; value: number; trend: string; 
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
-  user = JSON.parse(localStorage.getItem('auth_user') || '{"name":"User"}');
-  today = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-
+export class DashboardComponent implements OnInit, OnDestroy {
+  user = this.readUser();
+  today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   greeting = this.getGreeting();
 
+  loading = true;
+  activities: ActivityItem[] = [];
+
   stats: StatCard[] = [
-    { icon: '👥', label: 'Active Users',     value: 0, trend: '↑ 12%', color: '#6C63FF', loading: true },
-    { icon: '📹', label: 'Ongoing Meetings', value: 0, trend: '↑ 3%',  color: '#00D4FF', loading: true },
-    { icon: '💬', label: 'Messages Today',   value: 0, trend: '↑ 28%', color: '#10B981', loading: true },
-    { icon: '✅', label: 'System Status',    value: 1, trend: 'Healthy', color: '#F59E0B', loading: true }
+    { icon: 'USERS', label: 'Active Users', value: 0, color: '#6C63FF' },
+    { icon: 'MEET', label: 'Ongoing Meetings', value: 0, color: '#00D4FF' },
+    { icon: 'CHAT', label: 'Messages Today', value: 0, color: '#10B981' }
   ];
 
-  activities = [
-    { icon: '👤', text: 'Alice joined the workspace', time: '2 min ago' },
-    { icon: '💬', text: 'Bob sent a message in #general', time: '5 min ago' },
-    { icon: '📹', text: 'Team standup meeting started', time: '12 min ago' },
-    { icon: '📁', text: 'Project files were updated', time: '1 hr ago' },
-    { icon: '🔔', text: 'System check completed', time: '2 hr ago' }
-  ];
+  private readonly destroy$ = new Subject<void>();
 
-  getGreeting(): string {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 17) return 'Good afternoon';
+  constructor(
+    private readonly http: HttpClient,
+    private readonly router: Router,
+    private readonly websocketService: WebsocketService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadDashboard();
+    this.bindRealtimeUpdates();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  get isWorkspaceEmpty(): boolean {
+    return this.stats.every((item) => item.value === 0) && this.activities.length === 0;
+  }
+
+  startMeeting(): void {
+    this.router.navigate(['/workspace/meetings/create']);
+  }
+
+  openChat(): void {
+    this.router.navigate(['/workspace/chat']);
+  }
+
+  inviteMembers(): void {
+    this.router.navigate(['/workspace/members']);
+  }
+
+  private loadDashboard(): void {
+    const usersCount$ = this.http.get<number | { count?: number }>(`${environment.apiBaseUrl}/api/users/count`).pipe(
+      map((response) => this.parseCount(response)),
+      catchError(() => of(0))
+    );
+
+    const meetingsCount$ = this.http.get<number | { count?: number }>(`${environment.apiBaseUrl}/api/meetings/active`).pipe(
+      map((response) => this.parseCount(response)),
+      catchError(() => of(0))
+    );
+
+    const messagesCount$ = this.http.get<number | { count?: number }>(`${environment.apiBaseUrl}/api/messages/today`).pipe(
+      map((response) => this.parseCount(response)),
+      catchError(() => of(0))
+    );
+
+    const activities$ = this.http.get<ActivityItem[]>(`${environment.apiBaseUrl}/api/activity/recent`).pipe(
+      catchError(() => of([]))
+    );
+
+    forkJoin([usersCount$, meetingsCount$, messagesCount$, activities$]).subscribe({
+      next: ([usersCount, meetingsCount, messagesCount, activities]) => {
+        this.stats = [
+          { ...this.stats[0], value: usersCount },
+          { ...this.stats[1], value: meetingsCount },
+          { ...this.stats[2], value: messagesCount }
+        ];
+        this.activities = activities ?? [];
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  private bindRealtimeUpdates(): void {
+    this.websocketService.watch('/topic/messages')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadDashboard());
+
+    this.websocketService.watch('/topic/presence')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadDashboard());
+
+    this.websocketService.watch('/topic/meetings')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadDashboard());
+  }
+
+  private parseCount(response: number | { count?: number }): number {
+    if (typeof response === 'number') {
+      return response;
+    }
+    return response?.count ?? 0;
+  }
+
+  private getGreeting(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
     return 'Good evening';
   }
 
-  ngOnInit() {
-    setTimeout(() => {
-      this.stats[0] = { ...this.stats[0], value: 24,  loading: false };
-      this.stats[1] = { ...this.stats[1], value: 3,   loading: false };
-      this.stats[2] = { ...this.stats[2], value: 142, loading: false };
-      this.stats[3] = { ...this.stats[3], value: 1,   loading: false };
-    }, 1200);
+  private readUser(): { name: string } {
+    const raw = localStorage.getItem('auth_user');
+    if (!raw) {
+      return { name: 'User' };
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+      return { name: parsed?.name || 'User' };
+    } catch {
+      localStorage.removeItem('auth_user');
+      return { name: 'User' };
+    }
   }
 }
+

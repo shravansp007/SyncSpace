@@ -6,26 +6,15 @@ import jakarta.validation.constraints.Size;
 public class ChatMessageInbound {
 
     @NotBlank
-    @Size(max = 100)
-    private String roomId;
-
-    @NotBlank
     @Size(max = 2000)
     private String content;
 
     @Size(max = 150)
     private String senderEmail;
 
-    @Size(max = 20)
-    private String messageType;
-
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
-    }
+    @NotBlank
+    @Size(max = 150)
+    private String receiverEmail;
 
     public String getContent() {
         return content;
@@ -43,11 +32,11 @@ public class ChatMessageInbound {
         this.senderEmail = senderEmail;
     }
 
-    public String getMessageType() {
-        return messageType;
+    public String getReceiverEmail() {
+        return receiverEmail;
     }
 
-    public void setMessageType(String messageType) {
-        this.messageType = messageType;
+    public void setReceiverEmail(String receiverEmail) {
+        this.receiverEmail = receiverEmail;
     }
 }

@@ -7,5 +7,7 @@ export interface AppNotification {
   message: string;
   timestamp: string;
   read: boolean;
+  actionUrl?: string;
+  metadata?: Record<string, string | number | boolean | null>;
 }
 

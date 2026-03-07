@@ -1,0 +1,18 @@
+<div class="video-page">
+  <div class="header">
+    <h2>Meeting {{ meetingId }}</h2>
+    <a routerLink="/workspace/meetings">Back to meetings</a>
+  </div>
+
+  <div class="videos">
+    <div class="video-card">
+      <p>You</p>
+      <video autoplay muted playsinline [appMediaStream]="localStream"></video>
+    </div>
+
+    <div *ngFor="let stream of remoteStreams | keyvalue; trackBy: trackByPeer" class="video-card">
+      <p>{{ stream.key }}</p>
+      <video autoplay playsinline [appMediaStream]="stream.value"></video>
+    </div>
+  </div>
+</div>

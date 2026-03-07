@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -30,12 +31,19 @@ export class LoginComponent {
     this.loading = true;
     this.error = '';
     const { email, password } = this.form.value;
-    this.http.post<{ token: string; user: any }>(
-      'http://localhost:8080/api/auth/login', { email, password }
+    this.http.post<{ token: string; id: number; name: string; email: string }>(
+      `${environment.apiBaseUrl}/api/auth/login`, { email, password }
     ).subscribe({
       next: (res) => {
         localStorage.setItem('auth_token', res.token);
-        localStorage.setItem('auth_user', JSON.stringify(res.user));
+        const user = {
+          id: res.id,
+          name: res.name,
+          email: res.email
+        };
+
+        localStorage.setItem('auth_user', JSON.stringify(user));
+        localStorage.setItem('syncspace.auth', JSON.stringify({ token: res.token, user }));
         this.router.navigate(['/workspace']);
       },
       error: (err) => {

@@ -1,6 +1,7 @@
 package com.syncspace.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
 import java.util.Map;
@@ -13,10 +14,19 @@ public class PresenceService {
     private final Map<String, Set<String>> userSessions = new ConcurrentHashMap<>();
     private final Map<String, Instant> lastSeen = new ConcurrentHashMap<>();
     private final Map<String, String> sessionToUser = new ConcurrentHashMap<>();
+    private final ApplicationEventPublisher eventPublisher;
+    private final ActiveUserService activeUserService;
+
+    public PresenceService(ApplicationEventPublisher eventPublisher, ActiveUserService activeUserService) {
+        this.eventPublisher = eventPublisher;
+        this.activeUserService = activeUserService;
+    }
 
     public void connect(String sessionId, String email) {
         userSessions.computeIfAbsent(email, ignored -> ConcurrentHashMap.newKeySet()).add(sessionId);
         sessionToUser.put(sessionId, email);
+        activeUserService.addUser(email);
+        publishPresenceEvent("USER_ONLINE", email);
     }
 
     public void disconnectBySession(String sessionId) {
@@ -31,6 +41,8 @@ public class PresenceService {
             if (sessions.isEmpty()) {
                 userSessions.remove(email);
                 lastSeen.put(email, Instant.now());
+                activeUserService.removeUser(email);
+                publishPresenceEvent("USER_OFFLINE", email);
             }
         }
     }
@@ -45,6 +57,11 @@ public class PresenceService {
     }
 
     public Set<String> onlineEmails() {
-        return userSessions.keySet();
+        Set<String> redisUsers = activeUserService.getActiveUsers();
+        return redisUsers.isEmpty() ? userSessions.keySet() : redisUsers;
+    }
+
+    private void publishPresenceEvent(String event, String email) {
+        eventPublisher.publishEvent(new PresenceChangedEvent(event, email, Instant.now(), onlineEmails().size()));
     }
 }

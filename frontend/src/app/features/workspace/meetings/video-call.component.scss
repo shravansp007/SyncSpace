@@ -1,0 +1,47 @@
+.video-page {
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+
+  h2 {
+    margin: 0;
+    color: #f8fafc;
+  }
+
+  a {
+    color: #93c5fd;
+    text-decoration: none;
+  }
+}
+
+.videos {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.video-card {
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 12px;
+
+  p {
+    color: #cbd5e1;
+    margin: 0 0 8px 0;
+    font-size: 13px;
+  }
+
+  video {
+    width: 100%;
+    height: 220px;
+    border-radius: 10px;
+    background: #020617;
+    object-fit: cover;
+  }
+}

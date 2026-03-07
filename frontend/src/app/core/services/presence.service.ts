@@ -1,6 +1,6 @@
 ﻿import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Subject, catchError, map, of, takeUntil, tap, timer } from 'rxjs';
+import { BehaviorSubject, Subject, catchError, map, of, takeUntil } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { PresenceMember, PresenceStatus, UserPresence } from '../models/user.model';
@@ -37,13 +37,7 @@ export class PresenceService implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((user) => this.upsertMember(this.toPresenceMember(user)));
 
-    timer(0, 12000)
-      .pipe(
-        tap(() => this.loadingSubject.next(this.membersSubject.value.length === 0)),
-        map(() => void 0),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(() => this.refresh());
+    this.refresh();
   }
 
   getPresence() {

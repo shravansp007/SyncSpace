@@ -1,0 +1,26 @@
+<div class="notification-wrap">
+  <button class="icon-btn" (click)="toggle()">
+    🔔
+    <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+  </button>
+
+  <div class="panel glass-card" *ngIf="open">
+    <div class="panel-header">
+      <strong>Notifications</strong>
+      <button class="mark-read-btn" (click)="markAllRead($event)">Mark all read</button>
+    </div>
+
+    <div class="empty" *ngIf="notifications.length === 0">No notifications yet.</div>
+
+    <button
+      class="item"
+      *ngFor="let notification of notifications"
+      [class.read]="notification.read"
+      (click)="openNotification(notification)"
+    >
+      <div class="title">{{ notification.title }}</div>
+      <div class="message">{{ notification.message }}</div>
+      <div class="time">{{ notification.timestamp | date: 'short' }}</div>
+    </button>
+  </div>
+</div>

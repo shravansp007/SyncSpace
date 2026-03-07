@@ -1,11 +1,24 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 
-import { AuthService } from '../services/auth.service';
-
 export const guestGuard: CanActivateFn = () => {
-  const auth = inject(AuthService);
   const router = inject(Router);
 
-  return auth.isAuthenticated ? router.createUrlTree(['/workspace/dashboard']) : true;
+  const hasLegacyToken = Boolean(localStorage.getItem('auth_token'));
+  const hasSessionToken = Boolean(
+    (() => {
+      try {
+        const raw = localStorage.getItem('syncspace.auth');
+        if (!raw) {
+          return null;
+        }
+        const parsed = JSON.parse(raw) as { token?: string };
+        return parsed.token ?? null;
+      } catch {
+        return null;
+      }
+    })()
+  );
+
+  return hasLegacyToken || hasSessionToken ? router.createUrlTree(['/workspace/dashboard']) : true;
 };
