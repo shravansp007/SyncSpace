@@ -1,0 +1,75 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: syncspace-mysql
+    environment:
+      MYSQL_DATABASE: syncspace
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-change_me}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p${DB_PASSWORD:-change_me} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: syncspace-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: syncspace-backend
+    environment:
+      SERVER_PORT: 8080
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:-change_me}
+      DB_URL: jdbc:mysql://mysql:3306/syncspace?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      JWT_SECRET: ${JWT_SECRET:-replace_with_at_least_32_characters_secret}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  signaling:
+    build:
+      context: ./signaling-server
+      dockerfile: Dockerfile
+    container_name: syncspace-signaling
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: syncspace-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+      - signaling
+
+volumes:
+  mysql_data:
+  redis_data:
